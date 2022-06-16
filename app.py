@@ -1,8 +1,10 @@
 import os
+import re
 
 from flask import Flask
 from flask_restful import Api
 from flask_jwt import JWT
+from db import db
 
 from security import authenticate, identity
 from resources.user import UserRegister
@@ -10,7 +12,12 @@ from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+
+uri = os.getenv('DATABASE_URL')
+if uri.startswith('postgres://'):
+    uri = uri.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = uri, 'sqlite:///data.db'  #os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  #Turning off flask_sqlalchemy's modification tracker, SQLAlchemy's modification tracker is better.
 app.secret_key = 'rayman'
 api = Api(app)
